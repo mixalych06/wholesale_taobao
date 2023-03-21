@@ -44,14 +44,99 @@ async def categories_in_stock(callback_query: types.CallbackQuery):
 
 
 async def product_in_stock_for_user(callback_query: types.CallbackQuery):
+    """Выдаёт товары из выбраной категории"""
     inline_command = callback_query.data.split(':')
+    print(inline_command)
+    number = 0
     product_for_user = db.bd_checks_for_category_product_in_stock(inline_command[1], inline_command[2])
     print(product_for_user)
-    for i in product_for_user:
-        await callback_query.bot.send_photo(chat_id=callback_query.message.chat.id, photo=i[3],
-                                            caption=f"<b>{i[4].strip().upper()}</b>\n{i[5]}\n<b>Цена: </b>{i[6]}",
-                                                    parse_mode='HTML'
-                                            )
+    user_caption = f"<b>{product_for_user[number][4].strip().upper()}</b>\n" \
+                   f"{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]}"
+    if len(product_for_user) > 1:
+        await callback_query.bot.send_photo(chat_id=callback_query.message.chat.id, photo=product_for_user[number][3],
+                                            caption=user_caption,
+                                            parse_mode='HTML',
+                                            reply_markup=InlineKeyboardMarkup(row_width=4).
+                                            add(InlineKeyboardButton(f'{number + 1}/{len(product_for_user)}',
+                                                                     callback_data='null')).
+                                            add(InlineKeyboardButton("⬅️⬅️⬅️",
+                                                                     callback_data=f"next_u:{inline_command[1]}:"
+                                                                                   f"{inline_command[2]}:"
+                                                                                   f"{len(product_for_user) - 1}"),
+                                                InlineKeyboardButton("➡️➡️➡️",
+                                                                     callback_data=f"next_u:{inline_command[1]}:"
+                                                                                   f"{inline_command[2]}:{number + 1}")).
+                                            add(InlineKeyboardButton('В корзину',
+                                                                     callback_data="null")))
+    elif len(product_for_user) == 1:
+        await callback_query.bot.send_photo(chat_id=callback_query.message.chat.id, photo=product_for_user[number][3],
+                                            caption=user_caption,
+                                            parse_mode='HTML',
+                                            reply_markup=InlineKeyboardMarkup(row_width=4).
+                                            add(InlineKeyboardButton(f'{number + 1}/{len(product_for_user)}',
+                                                                     callback_data='null')).
+                                            add(InlineKeyboardButton("⬅️⬅️⬅️",
+                                                                     callback_data='null'),
+                                                InlineKeyboardButton("➡️➡️➡️",
+                                                                     callback_data='null')).
+                                            add(InlineKeyboardButton('В корзину',
+                                                                     callback_data="null")))
+
+
+async def next_product_user(callback_query: types.CallbackQuery):
+    """Обработка кнопок пагинации"""
+    inline_command = callback_query.data.split(':')
+    number = int(inline_command[3])
+    product_for_user = db.bd_checks_for_category_product_in_stock(inline_command[1], inline_command[2])
+    user_caption = f"<b>{product_for_user[number][4].strip().upper()}</b>\n" \
+                   f"{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]}"
+    photo = InputMediaPhoto(media=product_for_user[number][3], caption=user_caption, parse_mode='HTML')
+    if 0 < number < len(product_for_user) - 1:
+        await callback_query.bot.edit_message_media(media=photo, chat_id=callback_query.message.chat.id,
+                                                    message_id=callback_query.message.message_id,
+                                                    reply_markup=InlineKeyboardMarkup(row_width=4).
+                                                    add(InlineKeyboardButton(f'{number + 1}/{len(product_for_user)}',
+                                                                             callback_data='null')).
+                                                    add(InlineKeyboardButton("⬅️⬅️⬅️",
+                                                                             callback_data=f"next_u:{inline_command[1]}:"
+                                                                                           f"{inline_command[2]}:"
+                                                                                           f"{number - 1}"),
+                                                        InlineKeyboardButton("➡️➡️➡️",
+                                                                             callback_data=f"next_u:{inline_command[1]}:"
+                                                                                           f"{inline_command[2]}:{number + 1}")).
+                                                    add(InlineKeyboardButton('В корзину',
+                                                                             callback_data="null")))
+    elif number == 0:
+        await callback_query.bot.edit_message_media(media=photo, chat_id=callback_query.message.chat.id,
+                                                    message_id=callback_query.message.message_id,
+                                                    reply_markup=InlineKeyboardMarkup(row_width=4).
+                                                    add(InlineKeyboardButton(f'{number + 1}/{len(product_for_user)}',
+                                                                             callback_data='null')).
+                                                    add(InlineKeyboardButton("⬅️⬅️⬅️",
+                                                                             callback_data=f"next_u:{inline_command[1]}:"
+                                                                                           f"{inline_command[2]}:"
+                                                                                           f"{len(product_for_user) - 1}"),
+                                                        InlineKeyboardButton("➡️➡️➡️",
+                                                                             callback_data=f"next_u:{inline_command[1]}:"
+                                                                                           f"{inline_command[2]}:{number + 1}")).
+                                                    add(InlineKeyboardButton('В корзину',
+                                                                             callback_data="null")))
+    elif number == len(product_for_user) - 1:
+        await callback_query.bot.edit_message_media(media=photo, chat_id=callback_query.message.chat.id,
+                                                    message_id=callback_query.message.message_id,
+                                                    reply_markup=InlineKeyboardMarkup(row_width=4).
+                                                    add(InlineKeyboardButton(f'{number + 1}/{len(product_for_user)}',
+                                                                             callback_data='null')).
+                                                    add(InlineKeyboardButton("⬅️⬅️⬅️",
+                                                                             callback_data=f"next_u:{inline_command[1]}:"
+                                                                                           f"{inline_command[2]}:"
+                                                                                           f"{number - 1}"),
+                                                        InlineKeyboardButton("➡️➡️➡️",
+                                                                             callback_data=f"next_u:{inline_command[1]}:"
+                                                                                           f"{inline_command[2]}:{0}")).
+                                                    add(InlineKeyboardButton('В корзину',
+                                                                             callback_data="null")))
+
 
 
 def register_handler_users(dp: Dispatcher):
@@ -61,3 +146,4 @@ def register_handler_users(dp: Dispatcher):
     dp.register_callback_query_handler(categories_in_stock, lambda x: x.data.startswith('categor_for_user'))
     dp.register_callback_query_handler(product_in_stock_for_user,
                                        lambda x: x.data.startswith('product_for_user'))
+    dp.register_callback_query_handler(next_product_user, lambda x: x.data.startswith('next_u'))
