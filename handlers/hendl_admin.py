@@ -169,7 +169,7 @@ async def add_product_prise(message: types.Message, state: FSMContext):
 async def add_product_count(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['count'] = message.text
-        db.add_product_in_stock(list(data.values()))
+        db.bd_add_product_in_stock(list(data.values()))
         await message.answer(text='опубликовано')
         await state.finish()
 

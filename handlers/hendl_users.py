@@ -46,10 +46,9 @@ async def categories_in_stock(callback_query: types.CallbackQuery):
 async def product_in_stock_for_user(callback_query: types.CallbackQuery):
     """Выдаёт товары из выбраной категории"""
     inline_command = callback_query.data.split(':')
-    print(inline_command)
     number = 0
     product_for_user = db.bd_checks_for_category_product_in_stock(inline_command[1], inline_command[2])
-    print(product_for_user)
+    print(product_for_user[number])
     user_caption = f"<b>{product_for_user[number][4].strip().upper()}</b>\n" \
                    f"{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]}"
     if len(product_for_user) > 1:
@@ -67,7 +66,8 @@ async def product_in_stock_for_user(callback_query: types.CallbackQuery):
                                                                      callback_data=f"next_u:{inline_command[1]}:"
                                                                                    f"{inline_command[2]}:{number + 1}")).
                                             add(InlineKeyboardButton('В корзину',
-                                                                     callback_data="null")))
+                                                                     callback_data=f"basket:"
+                                                                                   f"{product_for_user[number][0]}")))
     elif len(product_for_user) == 1:
         await callback_query.bot.send_photo(chat_id=callback_query.message.chat.id, photo=product_for_user[number][3],
                                             caption=user_caption,
@@ -80,7 +80,8 @@ async def product_in_stock_for_user(callback_query: types.CallbackQuery):
                                                 InlineKeyboardButton("➡️➡️➡️",
                                                                      callback_data='null')).
                                             add(InlineKeyboardButton('В корзину',
-                                                                     callback_data="null")))
+                                                                     callback_data=f"basket:"
+                                                                                   f"{product_for_user[number][0]}")))
 
 
 async def next_product_user(callback_query: types.CallbackQuery):
@@ -105,7 +106,8 @@ async def next_product_user(callback_query: types.CallbackQuery):
                                                                              callback_data=f"next_u:{inline_command[1]}:"
                                                                                            f"{inline_command[2]}:{number + 1}")).
                                                     add(InlineKeyboardButton('В корзину',
-                                                                             callback_data="null")))
+                                                                             callback_data=f"basket:"
+                                                                                   f"{product_for_user[number][0]}")))
     elif number == 0:
         await callback_query.bot.edit_message_media(media=photo, chat_id=callback_query.message.chat.id,
                                                     message_id=callback_query.message.message_id,
@@ -120,7 +122,8 @@ async def next_product_user(callback_query: types.CallbackQuery):
                                                                              callback_data=f"next_u:{inline_command[1]}:"
                                                                                            f"{inline_command[2]}:{number + 1}")).
                                                     add(InlineKeyboardButton('В корзину',
-                                                                             callback_data="null")))
+                                                                             callback_data=f"basket:"
+                                                                                   f"{product_for_user[number][0]}")))
     elif number == len(product_for_user) - 1:
         await callback_query.bot.edit_message_media(media=photo, chat_id=callback_query.message.chat.id,
                                                     message_id=callback_query.message.message_id,
@@ -135,7 +138,15 @@ async def next_product_user(callback_query: types.CallbackQuery):
                                                                              callback_data=f"next_u:{inline_command[1]}:"
                                                                                            f"{inline_command[2]}:{0}")).
                                                     add(InlineKeyboardButton('В корзину',
-                                                                             callback_data="null")))
+                                                                             callback_data=f"basket:"
+                                                                                   f"{product_for_user[number][0]}")))
+
+def user_add_product_to_the_basket(callback_query: types.CallbackQuery):
+    """пользователь добавляет товар в корзину"""
+    inline_command = callback_query.data.split(':')
+    number = int(inline_command[3])
+    product_for_user = db.bd_checks_for_category_product_in_stock(inline_command[1], inline_command[2])
+    user_caption = f"<b>{product_for_user[number][4].strip().upper()}</b>\n
 
 
 
@@ -147,3 +158,4 @@ def register_handler_users(dp: Dispatcher):
     dp.register_callback_query_handler(product_in_stock_for_user,
                                        lambda x: x.data.startswith('product_for_user'))
     dp.register_callback_query_handler(next_product_user, lambda x: x.data.startswith('next_u'))
+    dp.register_callback_query_handler(user_add_product_to_the_basket, lambda x: x.data.startswith('basket'))

@@ -28,6 +28,10 @@ class DataBase:
                                 'last_purchase_date INTEGER DEFAULT 1,'
                                 'total_money INTEGER DEFAULT 1)')
 
+        self.connection.execute('CREATE TABLE IF NOT EXISTS basket'
+                                '(user_id,'
+                                'id_product,'
+                                'count)')
         self.connection.commit()
 
     """*********************Проверки существования в базе*******************************"""
@@ -81,10 +85,15 @@ class DataBase:
 
     """*********************************************************************************"""
 
-    '''*********************Запросы из базы ********************************************'''
-    '''*********************************************************************************'''
+    """*********************Изменение значений в существующих записях ********************************************"""
+    def changes_count_in_basket(self, user_id, id_product):
+        """Изменение количества товара в корзине yf +1"""
+        with self.connection:
+            self.cursor.execute("UPDATE basket SET count = count + 1 WHERE user_id = ? AND id_product = ?",
+                                (user_id, id_product))
+    """*********************************************************************************"""
 
-    '''*********************Добавление в базу*******************************************'''
+    """*********************Добавление в базу*******************************************"""
 
     def bd_add_country(self, country):
         with self.connection:
@@ -97,13 +106,20 @@ class DataBase:
                 self.cursor.execute("INSERT INTO categories (category) VALUES (?)", (cat_y,))
             self.connection.commit()
 
-    def add_product_in_stock(self, product):
+    def bd_add_product_in_stock(self, product):
         with self.connection:
             self.cursor.execute("INSERT INTO stock "
                                 "(country, category, id_photo, product_name, specifications, price,count) "
                                 "VALUES (?, ?, ?, ?, ?, ?, ?)", product)
             self.connection.commit()
 
+    def bd_add_product_in_basket(self, user_id, id_product, count=1):
+        """Запись товара добавленогов корзину но не купленого"""
+        with self.connection:
+            self.cursor.execute("INSERT INTO basket (user_id, id_product, count) VALUES (?, ?, ?)",
+                                (user_id, id_product, count))
+
     '''*********************************************************************************'''
 # db = DataBase('database.db')
-# db.bd_checks_for_category()
+# # db.add_product_in_basket(22, 55)
+# db.changes_count_in_basket(22, 55)
