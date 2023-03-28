@@ -7,18 +7,11 @@ from keyboards.kb_admin import keyboard_admin1
 from keyboards.kb_user import keyboard_user
 from keyboards.kb_other import gen_markup_category
 from create_bot import ADMIN_ID
+from handlers.hendl_other import cancel_fsm
 
 
 async def start_admin(message: types.Message):
-    if str(message.from_user.id) in ADMIN_ID:
-        await bot.send_message(chat_id=message.from_user.id, text='Привет, админ', reply_markup=keyboard_admin1)
-    else:
-        await bot.send_photo(message.from_user.id, photo=InputFile('data/logo1.png'),
-                             caption=f'<b>Привет, {message.from_user.first_name}!</b>\n'
-                                     f'Для просмотра товара нажмите на кнопуку В наличии\n'
-                                     f'<i>С предложениями и вопросами обращаться к\n'
-                                     f'<a href="https://t.me/mixalych06">администратору</a></i>',
-                             parse_mode='HTML', reply_markup=keyboard_user)
+    await bot.send_message(chat_id=message.from_user.id, text='Привет, админ', reply_markup=keyboard_admin1)
 
 
 class FSMRAddCountry(StatesGroup):
@@ -30,6 +23,7 @@ async def add_country_btn(message: types.Message):
     countries = db.bd_checks_for_country()
     country_dict = {country: 'red_count' for country in countries}
     country_dict['Добавить страну'] = 'add_count'
+    country_dict['Отмена'] = "cancel"
     await bot.send_message(message.from_user.id, text='Выберите страну для редактирования или добавьте новую',
                            reply_markup=await gen_markup_category(country_dict))
 
@@ -49,6 +43,7 @@ async def add_country(message: types.Message, state: FSMContext):
     countries = db.bd_checks_for_country()
     country_dict = {country: 'red_count' for country in countries}
     country_dict['Добавить страну'] = 'add_count'
+    country_dict['Отмена'] = "cancel"
     await bot.send_message(message.from_user.id, text='Выберите страну для редактирования или добавьте новую',
                            reply_markup=await gen_markup_category(country_dict))
 
@@ -62,6 +57,7 @@ async def add_categories_btn(message: types.Message):
     categories = db.bd_checks_for_categories()
     categories_dict = {category: 'red_categor' for category in categories}
     categories_dict['Добавить категории'] = 'add_categor'
+    categories_dict['Отмена'] = "cancel"
     await bot.send_message(message.from_user.id, text='Выберите категорию для редактирования или добавьте новые',
                            reply_markup=await gen_markup_category(categories_dict))
 
@@ -81,6 +77,7 @@ async def add_categories(message: types.Message, state: FSMContext):
     categories = db.bd_checks_for_categories()
     categories_dict = {category: 'red_categor' for category in categories}
     categories_dict['Добавить категории'] = 'add_categor'
+    categories_dict['Отмена'] = "cancel"
     await bot.send_message(message.from_user.id, text='Выберите категорию для редактирования или добавьте новые',
                            reply_markup=await gen_markup_category(categories_dict))
 
@@ -99,6 +96,7 @@ async def add_product_start(message: types.Message):
     """Обработка  кнопки добавить товар/ Старт FSMAddProduct"""
     countries = db.bd_checks_for_country()
     country_dict = {country: 'add_prod_countr' for country in countries}
+    country_dict['Отмена'] = "cancel"
     if countries:
         await bot.send_message(message.from_user.id, text='Выберите страну',
                                reply_markup=await gen_markup_category(country_dict))
@@ -116,6 +114,7 @@ async def add_product_counter(callback_query: types.CallbackQuery, state: FSMCon
         categories = db.bd_checks_for_categories()
         if categories:
             categories_dict = {category: 'add_prod_categor' for category in categories}
+            categories_dict['Отмена'] = "cancel"
             await callback_query.message.reply(text='Выберите категорию',
                                                reply_markup=await gen_markup_category(categories_dict))
         else:
