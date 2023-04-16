@@ -2,6 +2,9 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 async def repl_for_order(user_id, number=0, lot=0, len_goods=0):
+    """user_id, number=0 - порядковый номер просматриваемого товара,
+    lot=0 - количество товара в заказе,
+    len_goods=0 длина списка товаров"""
     repl = InlineKeyboardMarkup(row_width=4)
     if number == 0:
         repl.add(InlineKeyboardButton(

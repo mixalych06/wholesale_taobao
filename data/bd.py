@@ -99,6 +99,10 @@ class DataBase:
         """Возращает цену одного товара по id товара"""
         with self.connection:
             return self.cursor.execute("SELECT price FROM stock WHERE ID = ?", (id_product,)).fetchone()[0]
+    def bd_returns_one_item_product_name(self, id_product):
+        """Возращает product_name одного товара по id товара"""
+        with self.connection:
+            return self.cursor.execute("SELECT product_name FROM stock WHERE ID = ?", (id_product,)).fetchone()[0]
 
     def bd_order_verification(self, id_products):
         """Возращает полное описание одного товара по id товара"""
@@ -136,6 +140,10 @@ class DataBase:
             return bool(
                 self.cursor.execute("SELECT EXISTS(SELECT * FROM users WHERE user_id = ?)", (user_id,)).fetchone()[0])
 
+    def bd_id_order(self, id_user):
+        """Возвращает последний заказ"""
+        with self.connection:
+            return self.cursor.execute("SELECT * FROM orders WHERE  user_id = ? GROUP BY user_id HAVING max(ID)", (id_user,)).fetchone()
     """*********************************************************************************"""
 
     """*********************Изменение значений в существующих записях ********************************************"""
@@ -200,6 +208,8 @@ class DataBase:
         with self.connection:
             self.cursor.execute("DELETE FROM basket WHERE user_id = ? AND verified = 0",
                                 (user_id,))
+
+
 
     """*********************************************************************************"""
 

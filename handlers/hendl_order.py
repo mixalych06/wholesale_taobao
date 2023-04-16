@@ -103,13 +103,27 @@ async def order_formation(user_id):
                       + str(prod[3]) + ':'
                       + str(db.bd_returns_one_item_price(int(prod[1]))) for prod in user_prod]
     date_new = datetime.today()
-
     amount = map(lambda x: float(x.split(':')[2]), order_quantity)
     db.bd_add_product_in_orders((user_id, date_new.strftime("%d.%m.%Y"), date_new.strftime("%H.%M.%S"),
-                                 str(order_quantity), sum(amount)))
+                                 (',').join(order_quantity), sum(amount)))
     for product in user_prod:
         db.bd_changes_count_in_stock(product[3], product[1])
     # db.bd_del_all_basket_from_user(user_id)
+    order = db.bd_id_order(user_id)
+    order_product = [i.split(':') for i in order[4].split(',')]
+    a = ''
+    for j in order_product:
+        a += db.bd_returns_one_item_product_name(int(j[0])) + j[1] + 'шт.' + j[2] + 'руб/шт.' + '\n'
+    await bot.send_message(user_id, text=f'Ваш Заказ №{order[0]}\n {a} отправлен на сборку,\n'
+                                         f'пожалуйста дождитесь сообщения о готовности',
+                           parse_mode='HTML')
+    await bot.send_message(ADMIN_ID, text=f'Заказ №{order[0]}\n {a} отправлен на сборку,\n'
+                                         f'пожалуйста дождитесь сообщения о готовности',
+                           parse_mode='HTML', reply_markup=InlineKeyboardMarkup().
+                             add(InlineKeyboardButton(f'Готов',
+                                                      callback_data=f"null")).
+                             add(InlineKeyboardButton('Подробнее', callback_data=f"null"),
+                                 InlineKeyboardButton('Сообщение', callback_data=f"null")))
 
 
 def register_handler_order(dp: Dispatcher):
