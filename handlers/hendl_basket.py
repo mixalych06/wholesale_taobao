@@ -19,7 +19,6 @@ async def basket_details_user(callback: types.CallbackQuery):
     inline_command = callback.data.split(':')
     number = int(inline_command[1])
     all_product_for_user = db.bd_all_product_for_user_in_the_basket(callback.from_user.id)
-
     try:
         prod = db.bd_returns_one_item(all_product_for_user[number][1])
         print(prod)
@@ -28,11 +27,10 @@ async def basket_details_user(callback: types.CallbackQuery):
         await callback.message.delete()
         await bot.send_message(callback.message.chat.id, 'Корзина пустая')
         return
-
+    user_caption = f'<b>{prod[4].strip().upper()}</b>\n{prod[5]}\n<b>Цена: </b>{prod[6]}'
     if len(all_product_for_user) == 1:
         await callback.bot.send_photo(callback.from_user.id, photo=prod[3],
-                                      caption=f"<b>{prod[4].strip().upper()}</b>\n{prod[5]}\n<b>Цена: </b>{prod[6]}",
-                                      parse_mode='HTML',
+                                      caption=user_caption, parse_mode='HTML',
                                       reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton(
                                           f'В корзине: {all_product_for_user[number][2]} шт.', callback_data=f"null")).
                                       add(InlineKeyboardButton(
@@ -41,8 +39,7 @@ async def basket_details_user(callback: types.CallbackQuery):
 
     elif len(all_product_for_user) > 1:
         await callback.bot.send_photo(callback.from_user.id, photo=prod[3],
-                                      caption=f'<b>{prod[4].strip().upper()}</b>\n{prod[5]}\n<b>Цена: </b>{prod[6]}',
-                                      parse_mode='HTML',
+                                      caption=user_caption, parse_mode='HTML',
                                       reply_markup=await repl_for_basket(callback.from_user.id, prod=prod[0],
                                                                          number=number,
                                                                          lot=all_product_for_user[number][2],

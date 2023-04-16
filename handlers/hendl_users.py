@@ -7,7 +7,6 @@ from keyboards.kb_other import gen_markup_category
 from datetime import date
 
 
-
 async def command_start(message: types.Message):
     if db.bd_checks_the_existence_of_the_user(message.from_user.id):
         await bot.send_photo(message.from_user.id, photo=InputFile('data/logo1.png'),
@@ -24,8 +23,6 @@ async def command_start(message: types.Message):
                                      f'<i>С предложениями и вопросами обращаться к\n'
                                      f'<a href="https://t.me/mixalych06">администратору</a></i>',
                              parse_mode='HTML', reply_markup=keyboard_user)
-
-
 
 
 async def command_help(message: types.Message):
@@ -64,11 +61,13 @@ async def categories_in_stock(callback_query: types.CallbackQuery):
 async def product_in_stock_for_user(callback_query: types.CallbackQuery):
     """Выдаёт товары из выбраной категории"""
     inline_command = callback_query.data.split(':')
+    print(inline_command)
     number = 0
     product_for_user = db.bd_checks_for_category_product_in_stock(inline_command[1], inline_command[2])
-    print(product_for_user[number])
+    print(product_for_user)
     user_caption = f'<b>{product_for_user[number][4].strip().upper()}</b>\n' \
-                   f'{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]}'
+                   f'<i>(В наличии {product_for_user[number][7]} шт.)</i>\n' \
+                   f'{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]} руб.'
     await callback_query.message.delete()
     print(product_for_user[number][1])
     if len(product_for_user) > 1:
@@ -114,7 +113,8 @@ async def next_product_user(callback_query: types.CallbackQuery):
     number = int(inline_command[3])
     product_for_user = db.bd_checks_for_category_product_in_stock(inline_command[1], inline_command[2])
     user_caption = f'<b>{product_for_user[number][4].strip().upper()}</b>\n' \
-                   f'{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]}'
+                   f'<i>(В наличии {product_for_user[number][7]} шт.)</i>\n' \
+                   f'{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]} руб.'
     photo = InputMediaPhoto(media=product_for_user[number][3], caption=user_caption, parse_mode='HTML')
     await callback_query.bot.edit_message_media(media=photo, chat_id=callback_query.message.chat.id,
                                                 message_id=callback_query.message.message_id,
@@ -128,9 +128,20 @@ async def next_product_user(callback_query: types.CallbackQuery):
 async def user_add_product_to_the_basket(callback_query: types.CallbackQuery):
     """пользователь добавляет товар в корзину"""
     inline_command = callback_query.data.split(':')
-    db.bd_add_product_in_basket(callback_query.from_user.id, inline_command[1])
-    lot = db.bd_checks_product_in_the_basket(callback_query.from_user.id, int(inline_command[1]))
-    await callback_query.answer(text=f'Добавлено в корзину\nВ корзине {lot[0][0]} шт.', show_alert=True)
+    how_many_products = db.bd_returns_one_item(inline_command[1])[7]
+    lot = db.bd_checks_product_in_the_basket(callback_query.from_user.id, inline_command[1])
+    print(lot)
+    print('11', how_many_products)
+    if not lot:
+        db.bd_add_product_in_basket(callback_query.from_user.id, inline_command[1])
+        await callback_query.answer(text=f'Добавлено в корзину\nВ корзине 1 шт.', cache_time=1)
+        return
+    elif int(lot[0][0]) >= int(how_many_products):
+        await callback_query.answer(text=f'Больше нельзя добавить\nВ корзине {lot[0][0]} шт.', cache_time=1)
+        return
+    else:
+        db.bd_add_product_in_basket(callback_query.from_user.id, inline_command[1])
+        await callback_query.answer(text=f'Добавлено в корзину\nВ корзине {lot[0][0]+1} шт.', cache_time=1)
 
 
 def register_handler_users(dp: Dispatcher):

@@ -5,9 +5,11 @@ from handlers.hendl_users import register_handler_users
 from handlers.hendl_admin import register_handler_admin
 from handlers.hendl_other import register_handler_other
 from handlers.hendl_basket import register_handler_basket
+from handlers.hendl_order import register_handler_order
 
 register_handler_admin(dp)
 register_handler_users(dp)
+register_handler_order(dp)
 register_handler_other(dp)
 register_handler_basket(dp)
 
