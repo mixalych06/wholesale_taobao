@@ -174,9 +174,11 @@ async def add_product_count(message: types.Message, state: FSMContext):
 
 
 def register_handler_admin(dp: Dispatcher):
-    dp.register_message_handler(start_admin, commands=['startadministrator'])
+    dp.register_message_handler(start_admin, lambda message: str(message.from_user.id) in ADMIN_ID,
+                                text=['Назад', '/startadministrator'])
 
-    dp.register_message_handler(add_product_start, text='Добавить товар', state=None)
+    dp.register_message_handler(add_product_start, lambda message: str(message.from_user.id) in ADMIN_ID,
+                                text='Добавить товар', state=None)
     dp.register_callback_query_handler(add_product_counter, lambda x: x.data.startswith('add_prod_countr'),
                                        state=FSMRAddProduct.country)
     dp.register_callback_query_handler(add_product_category, lambda x: x.data.startswith('add_prod_categor'),
@@ -187,10 +189,12 @@ def register_handler_admin(dp: Dispatcher):
     dp.register_message_handler(add_product_prise, state=FSMRAddProduct.prise)
     dp.register_message_handler(add_product_count, state=FSMRAddProduct.count)
 
-    dp.register_message_handler(add_country_btn, text='Добавить страну')
+    dp.register_message_handler(add_country_btn, lambda message: str(message.from_user.id) in ADMIN_ID,
+                                text='Добавить страну')
     dp.register_callback_query_handler(start_fsm_add_country, lambda x: x.data.startswith('add_count'), state=None)
     dp.register_message_handler(add_country, state=FSMRAddCountry.country)
 
-    dp.register_message_handler(add_categories_btn, text='Добавить категорию')
+    dp.register_message_handler(add_categories_btn, lambda message: str(message.from_user.id) in ADMIN_ID,
+                                text='Добавить категорию')
     dp.register_callback_query_handler(start_fsm_add_categories, lambda x: x.data.startswith('add_categor'), state=None)
     dp.register_message_handler(add_categories, state=FSMRAddCategories.categories)

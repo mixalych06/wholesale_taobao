@@ -5,8 +5,9 @@ keyboard_user: ReplyKeyboardMarkup = ReplyKeyboardMarkup(resize_keyboard=True)
 
 but_user_products_in_stock: KeyboardButton = KeyboardButton('Товары в наличии')
 but_user_basket: KeyboardButton = KeyboardButton('🛒Корзина')
+but_user_orders: KeyboardButton = KeyboardButton('Мои Заказы')
 but_help: KeyboardButton = KeyboardButton('🆘Помощь')
-keyboard_user.add(but_user_products_in_stock, but_user_basket).add(but_help)
+keyboard_user.add(but_user_products_in_stock, but_user_basket).add(but_user_orders, but_help)
 
 """
       Кнопки для корзины если в корзине более наменования принимает:
@@ -17,22 +18,26 @@ keyboard_user.add(but_user_products_in_stock, but_user_basket).add(but_help)
       Отдаёт инлайн клавиатуру"""
 
 
-async def repl_for_categor(prod, id_prod, category, komand, number=0):
+async def repl_for_categor(prod, id_prod, category, komand, country, number=0):
     """Создает кнопки пагинации для товаров в наличии в зависимости от порядкового номера текущего товара"""
     repl = InlineKeyboardMarkup(row_width=4)
+    print(country)
     if 0 < number < prod - 1:
-        repl.add(InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null')).add(
-            InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_u:{category}:{komand}:{number - 1}'),
-            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_u:{category}:{komand}:{number + 1}')).add(
-            InlineKeyboardButton('В корзину', callback_data=f'add_basket:{id_prod}'))
+        repl.add(InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_u:{category}:{komand}:{number - 1}'),
+                 InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
+                 InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_u:{category}:{komand}:{number + 1}')).add(
+            InlineKeyboardButton('В корзину', callback_data=f'add_basket:{id_prod}'),
+            InlineKeyboardButton('Назад', callback_data=f'catforus:{country}'))
     elif number == 0:
-        repl.add(InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null')).add(
-            InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_u:{category}:{komand}:{prod - 1}'),
-            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_u:{category}:{komand}:{number + 1}')).add(
-            InlineKeyboardButton('В корзину', callback_data=f'add_basket:{id_prod}'))
+        repl.add(InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_u:{category}:{komand}:{prod - 1}'),
+                 InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
+                 InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_u:{category}:{komand}:{number + 1}')).add(
+            InlineKeyboardButton('В корзину', callback_data=f'add_basket:{id_prod}'),
+            InlineKeyboardButton('Назад', callback_data=f'catforus:{country}'))
     elif number == prod - 1:
-        repl.add(InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null')).add(
-            InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_u:{category}:{komand}:{number - 1}'),
-            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_u:{category}:{komand}:{0}')).add(
-            InlineKeyboardButton('В корзину', callback_data=f'add_basket:{id_prod}'))
+        repl.add(InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_u:{category}:{komand}:{number - 1}'),
+                 InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
+                 InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_u:{category}:{komand}:{0}')).add(
+            InlineKeyboardButton('В корзину', callback_data=f'add_basket:{id_prod}'),
+            InlineKeyboardButton('Назад', callback_data=f'catforus:{country}'))
     return repl

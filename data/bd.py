@@ -64,7 +64,7 @@ class DataBase:
         """запрос стран для user"""
         try:
             with self.connection:
-                x = self.cursor.execute("SELECT country FROM stock").fetchall()
+                x = self.cursor.execute("SELECT country FROM stock WHERE count >= 1 AND value = 1").fetchall()
                 return [i[0] for i in x]
         except IndexError:
             return []
@@ -75,6 +75,26 @@ class DataBase:
             with self.connection:
                 x = self.cursor.execute("SELECT category FROM stock WHERE count >= 1 AND value = 1 AND country = ?",
                                         (counter,)).fetchall()
+                return [i[0] for i in x]
+        except IndexError:
+            return []
+
+    def bd_checks_for_country_in_stock_for_admin(self):
+        """запрос стран для admin"""
+        try:
+            with self.connection:
+                x = self.cursor.execute("SELECT country FROM stock WHERE value = 1").fetchall()
+                return [i[0] for i in x]
+        except IndexError:
+            return []
+
+    def bd_checks_for_category_in_stock_for_admin(self, counter):
+        """запрос категорий для admin"""
+        try:
+            with self.connection:
+                x = self.cursor.execute("SELECT category FROM stock WHERE value = 1 AND country = ?",
+                                        (counter,)).fetchall()
+                print(1, x)
                 return [i[0] for i in x]
         except IndexError:
             return []
@@ -90,6 +110,16 @@ class DataBase:
         except IndexError:
             return []
 
+
+    def bd_checks_for_category_product_in_stock_for_admin(self, counter, category):
+        """Отдаёт admin список продуктов по стране и категории если продукт не удалён флаг value = 1"""
+        try:
+            with self.connection:
+                return self.cursor.execute("SELECT * FROM stock "
+                                           "WHERE country = ? AND category = ? AND value = 1",
+                                           (counter, category)).fetchall()
+        except IndexError:
+            return []
     def bd_returns_one_item(self, id_product):
         """Возращает полное описание одного товара по id товара"""
         with self.connection:
@@ -99,6 +129,7 @@ class DataBase:
         """Возращает цену одного товара по id товара"""
         with self.connection:
             return self.cursor.execute("SELECT price FROM stock WHERE ID = ?", (id_product,)).fetchone()[0]
+
     def bd_returns_one_item_product_name(self, id_product):
         """Возращает product_name одного товара по id товара"""
         with self.connection:
@@ -143,7 +174,31 @@ class DataBase:
     def bd_id_order(self, id_user):
         """Возвращает последний заказ"""
         with self.connection:
-            return self.cursor.execute("SELECT * FROM orders WHERE  user_id = ? GROUP BY user_id HAVING max(ID)", (id_user,)).fetchone()
+            return self.cursor.execute("SELECT * FROM orders WHERE  user_id = ? GROUP BY user_id HAVING max(ID)",
+                                       (id_user,)).fetchone()
+
+    def bd_return_id_user_from_the_order(self, id_order):
+        """Возвращает id пользователя по номеру заказа"""
+        with self.connection:
+            return self.cursor.execute("SELECT user_id FROM orders WHERE  ID = ?",
+                                       (id_order,)).fetchone()[0]
+
+    def bd_all_order_for_user(self, id_user):
+        """Возвращает все не выданые товары пользователя"""
+        with self.connection:
+            return self.cursor.execute("SELECT * FROM orders WHERE  user_id = ? AND issued = 0",
+                                       (id_user,)).fetchall()
+
+    def bd_all_ready_order(self):
+        """Возвращает все готовые не выданые товары """
+        with self.connection:
+            return self.cursor.execute("SELECT * FROM orders WHERE ready = 1 AND issued = 0").fetchall()
+
+    def bd_all_not_ready_order(self):
+        """Возвращает все не готовые  и не выданые товары """
+        with self.connection:
+            return self.cursor.execute("SELECT * FROM orders WHERE ready = 0 AND issued = 0").fetchall()
+
     """*********************************************************************************"""
 
     """*********************Изменение значений в существующих записях ********************************************"""
@@ -201,16 +256,32 @@ class DataBase:
         """удаление всех товаров пользователя"""
         with self.connection:
             self.cursor.execute("DELETE FROM basket WHERE user_id = ?", (user_id,))
-        self.connection.commit()
+            self.connection.commit()
 
     def bd_del_from_the_basket_no_verified(self, user_id):
         """Удаление товаров из корзины которых нет в наличии"""
         with self.connection:
             self.cursor.execute("DELETE FROM basket WHERE user_id = ? AND verified = 0",
                                 (user_id,))
+            self.connection.commit()
 
+    def bd_order_is_ready(self, id_order):
+        """Изменение статуса заказа на готов (ready = 1)"""
+        with self.connection:
+            self.cursor.execute("UPDATE orders SET ready = 1 WHERE ID = ?", (id_order,))
+            self.connection.commit()
 
+    def bd_order_is_issued(self, id_order):
+        """Изменение статуса заказа на выдан (issued = 1)"""
+        with self.connection:
+            self.cursor.execute("UPDATE orders SET issued = 1 WHERE ID = ?", (id_order,))
+            self.connection.commit()
 
+    def bd_del_prod(self, id_prod):
+        """Удаление товара (issued = 1)"""
+        with self.connection:
+            self.cursor.execute("UPDATE stock SET value = 0 WHERE ID = ?", (id_prod,))
+            self.connection.commit()
     """*********************************************************************************"""
 
     """*********************Добавление в базу*******************************************"""

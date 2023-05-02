@@ -3,3 +3,4 @@ from keyboards import kb_admin
 from keyboards import kb_other
 from keyboards import kb_basket
 from keyboards import kb_order
+from keyboards import kb_edit_product
