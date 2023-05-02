@@ -44,19 +44,32 @@ async def coutry(message: types.Message):
                                reply_markup=await gen_markup_category(country_dict))
 
 
+async def coutry_inlin(callback_query: types.CallbackQuery):
+    """Кнопка товары в наличии"""
+    countries = set(db.bd_checks_for_country_in_stock())
+    country_dict = {country: 'catforus' for country in countries}
+    if countries:
+        await callback_query.message.delete()
+        await bot.send_message(callback_query.from_user.id, text='Выберите страну',
+                                              reply_markup=await gen_markup_category(country_dict))
+
+
 async def categories_in_stock(callback_query: types.CallbackQuery):
     """Кнопки категория для user"""
     inline_command = callback_query.data.split(':')
     user_id = callback_query.from_user.id
     categories = db.bd_checks_for_category_in_stock(inline_command[1])
     categories_dict = {category: f'prodforus:{str(inline_command[1])}' for category in categories}
+    categories_dict['Назад'] = f'countruback'
     try:
-        await callback_query.message.edit_text('Выберите категорию',
-                                               reply_markup=await gen_markup_category(categories_dict))
+        await callback_query.message.edit_text(f'<b>{inline_command[1]}</b>\nВыберите категорию',
+                                               reply_markup=await gen_markup_category(categories_dict),
+                                               parse_mode='HTML')
     except BadRequest:
         await callback_query.message.delete()
-        await bot.send_message(user_id, text='Выберите категорию',
-                               reply_markup=await gen_markup_category(categories_dict))
+        await bot.send_message(user_id, text=f'<b>{inline_command[1]}</b>\nВыберите категорию',
+                               reply_markup=await gen_markup_category(categories_dict),
+                               parse_mode='HTML')
 
 
 async def product_in_stock_for_user(callback_query: types.CallbackQuery):
@@ -145,6 +158,7 @@ async def view_my_orders(message: types.Message):
     all_orders = db.bd_all_order_for_user(message.from_user.id)
     if all_orders:
         for order in all_orders:
+            print(order)
             order_product = [i.split(':') for i in order[4].split(',')]
             a = ''
             for j in order_product:
@@ -179,3 +193,4 @@ def register_handler_users(dp: Dispatcher):
                                        lambda x: x.data.startswith('prodforus'))
     dp.register_callback_query_handler(next_product_user, lambda x: x.data.startswith('next_u'))
     dp.register_callback_query_handler(user_add_product_to_the_basket, lambda x: x.data.startswith('add_basket'))
+    dp.register_callback_query_handler(coutry_inlin, lambda x: x.data.startswith('countruback'))

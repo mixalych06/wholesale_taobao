@@ -18,26 +18,39 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMedia
       Отдаёт инлайн клавиатуру"""
 
 
-async def repl_for_categor_for_admin(prod, id_prod, category, komand, country, number=0):
+async def repl_for_categor_for_admin(prod, id_prod, category, country, number=0):
     """Создает кнопки пагинации для товаров в наличии в зависимости от порядкового номера текущего товара"""
     repl = InlineKeyboardMarkup(row_width=4)
+    print(category)
+
     print(country)
+    print(number)
+
     if 0 < number < prod - 1:
-        repl.add(InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{category}:{komand}:{number - 1}'),
-                 InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
-                 InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{category}:{komand}:{number + 1}')).add(
+        repl.add(
+            InlineKeyboardButton("➕", callback_data=f'plus:{id_prod}:{prod}:{number}:{-1}'),
+            InlineKeyboardButton("➖", callback_data=f'plus:{id_prod}:{prod}:{number}:{1}')).add(
+            InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{country}:{category}:{number - 1}'),
+            InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
+            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{country}:{category}:{number + 1}')).add(
             InlineKeyboardButton('Удалить', callback_data=f'delprod:{id_prod}'),
             InlineKeyboardButton('Назад', callback_data=f'catforad:{country}'))
     elif number == 0:
-        repl.add(InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{category}:{komand}:{prod - 1}'),
+        repl.add(
+            InlineKeyboardButton("➕", callback_data=f'plus:{id_prod}:{prod}:{number}:{-1}'),
+            InlineKeyboardButton("➖", callback_data=f'plus:{id_prod}:{prod}:{number}:{1}')).add(
+            InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{country}:{category}:{prod - 1}'),
             InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
-            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{category}:{komand}:{number + 1}')).add(
+            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{country}:{category}:{number + 1}')).add(
             InlineKeyboardButton('Удалить', callback_data=f'delprod:{id_prod}'),
             InlineKeyboardButton('Назад', callback_data=f'catforad:{country}'))
     elif number == prod - 1:
-        repl.add(InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{category}:{komand}:{number - 1}'),
+        repl.add(
+            InlineKeyboardButton("➕", callback_data=f'plus:{id_prod}:{prod}:{number}:{-1}'),
+            InlineKeyboardButton("➖", callback_data=f'plus:{id_prod}:{prod}:{number}:{1}')).add(
+            InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{country}:{category}:{number - 1}'),
             InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
-            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{category}:{komand}:{0}')).add(
+            InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{country}:{category}:{0}')).add(
             InlineKeyboardButton('Удалить', callback_data=f'delprod:{id_prod}'),
             InlineKeyboardButton('Назад', callback_data=f'catforad:{country}'))
     return repl

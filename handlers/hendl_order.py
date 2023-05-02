@@ -101,7 +101,7 @@ async def order_formation(user_id):
                               + str(full_prod[6]))
 
     date_new = datetime.today()
-    amount = map(lambda x: float(x.split(':')[3]), order_quantity)
+    amount = map(lambda x: float(x.split(':')[3]) * int(x.split(':')[2]), order_quantity)
     db.bd_add_product_in_orders((user_id, date_new.strftime("%d.%m.%Y"), date_new.strftime("%H.%M.%S"),
                                  (',').join(order_quantity), sum(amount)))
     for product in user_prod:
@@ -116,7 +116,7 @@ async def order_formation(user_id):
     await bot.send_message(user_id, text=f'<b>Ваш Заказ №{order[0]}</b>\n******\n{a}******\n<b>Сумма: {order[5]} руб.</b>\nОтправлен на сборку,\n'
                                          f'Пожалуйста дождитесь сообщения о готовности',
                            parse_mode='HTML', reply_markup=keyboard_user)
-    await bot.send_message(ADMIN_ID, text=f'Новый заказ №{order[0]}\n{a}<b>Сумма: {order[5]} руб.</b>',
+    await bot.send_message(ADMIN_ID, text=f'<b>Новый заказ №{order[0]}</b>\n{a}<b>Сумма: {order[5]} руб.</b>',
                            parse_mode='HTML', reply_markup=InlineKeyboardMarkup().
                            add(InlineKeyboardButton(f'Готов',
                                                     callback_data=f"is_ready:{order[0]}")).
