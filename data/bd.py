@@ -94,7 +94,6 @@ class DataBase:
             with self.connection:
                 x = self.cursor.execute("SELECT category FROM stock WHERE value = 1 AND country = ?",
                                         (counter,)).fetchall()
-                print(1, x)
                 return [i[0] for i in x]
         except IndexError:
             return []
@@ -140,13 +139,11 @@ class DataBase:
         a = []
         with self.connection:
             for i in id_products:
-                print(int(i))
                 a.append(self.cursor.execute("SELECT * FROM stock WHERE ID = ?", (i,)).fetchone())
             return a
 
     def bd_checks_product_in_the_basket(self, user_id, id_product):
         """проверка наличия товара в корзине"""
-        print('22', user_id, id_product)
         with self.connection:
             return self.cursor.execute("SELECT count FROM basket WHERE user_id = ? AND id_product = ?",
                                        (user_id, id_product)).fetchall()

@@ -1,6 +1,6 @@
 from create_bot import bot, db
 from aiogram import types, Dispatcher
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputFile
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from keyboards.kb_other import gen_markup_category
 from aiogram.utils.exceptions import BadRequest
 from keyboards.kb_edit_product import repl_for_categor_for_admin
@@ -40,7 +40,6 @@ async def product_in_stock_for_admin(callback_query: types.CallbackQuery):
     inline_command = callback_query.data.split(':')
     number = 0
     product_for_user = db.bd_checks_for_category_product_in_stock_for_admin(inline_command[1], inline_command[2])
-    print(product_for_user)
     user_caption = f'<b>{product_for_user[number][4].strip().upper()}</b>\n' \
                    f'<i>(В наличии {product_for_user[number][7]} шт.)</i>\n' \
                    f'{product_for_user[number][5]}\n<b>Цена: </b>{product_for_user[number][6]} руб.'
@@ -171,7 +170,6 @@ async def next_product_for_admin(callback_query: types.CallbackQuery):
 
 async def del_prod(callback_query: types.CallbackQuery):
     inline_command = callback_query.data.split(':')
-    print(inline_command)
     db.bd_del_prod(inline_command[1])
 
 

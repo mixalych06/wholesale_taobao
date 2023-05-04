@@ -1,13 +1,11 @@
 from create_bot import bot, db
 from aiogram import types, Dispatcher
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputFile
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from keyboards.kb_admin import keyboard_admin1
-from keyboards.kb_user import keyboard_user
 from keyboards.kb_other import gen_markup_category
 from create_bot import ADMIN_ID
-from handlers.hendl_other import cancel_fsm
 
 
 async def start_admin(message: types.Message):

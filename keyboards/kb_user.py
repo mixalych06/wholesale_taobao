@@ -21,7 +21,6 @@ keyboard_user.add(but_user_products_in_stock, but_user_basket).add(but_user_orde
 async def repl_for_categor(prod, id_prod, category, komand, country, number=0):
     """Создает кнопки пагинации для товаров в наличии в зависимости от порядкового номера текущего товара"""
     repl = InlineKeyboardMarkup(row_width=4)
-    print(country)
     if 0 < number < prod - 1:
         repl.add(InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_u:{category}:{komand}:{number - 1}'),
                  InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),

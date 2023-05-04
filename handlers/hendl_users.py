@@ -5,7 +5,6 @@ from aiogram.utils.exceptions import BadRequest
 from keyboards.kb_user import keyboard_user, repl_for_categor
 from keyboards.kb_other import gen_markup_category
 from datetime import date
-from create_bot import ADMIN_ID
 
 
 async def command_start(message: types.Message):
@@ -158,7 +157,6 @@ async def view_my_orders(message: types.Message):
     all_orders = db.bd_all_order_for_user(message.from_user.id)
     if all_orders:
         for order in all_orders:
-            print(order)
             order_product = [i.split(':') for i in order[4].split(',')]
             a = ''
             for j in order_product:
@@ -175,7 +173,7 @@ async def view_my_orders(message: types.Message):
                                             f'<b>Сумма: {order[5]} руб.</b>\n'
                                             f'Статус: <b>Готов к выдаче'
                                             f', Для получения свяжитесь с \n'
-                                            f'<a href="https://t.me/mixalych06">администратором</a></b>',
+                                            f'<a href="https://t.me/lyudmila_zakazi">администратором</a></b>',
                                        parse_mode='HTML', reply_markup=keyboard_user)
     else:
         await bot.send_message(message.from_user.id,

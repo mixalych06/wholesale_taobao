@@ -1,6 +1,6 @@
 from create_bot import bot, db
 from aiogram import types, Dispatcher
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputFile
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from create_bot import ADMIN_ID
 from keyboards.kb_user import keyboard_user
 from keyboards.kb_admin import keyboard_order_admin
@@ -13,7 +13,7 @@ async def order_is_ready(callback: types.CallbackQuery):
     user_id = db.bd_return_id_user_from_the_order(int(inline_command[1]))
     await bot.send_message(chat_id=user_id,
                            text=f'Ваш заказ №{inline_command[1]} готов к выдаче, для получения свяжитесь с \n'
-                                f'<a href="https://t.me/mixalych06">администратором</a>', parse_mode='HTML',
+                                f'<a href="https://t.me/lyudmila_zakazi">администратором</a>', parse_mode='HTML',
                            reply_markup=keyboard_user)
     await callback.answer(f'Заказ {inline_command[1]} собран и готов к выдаче')
     await callback.message.delete()

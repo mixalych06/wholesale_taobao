@@ -1,6 +1,6 @@
 from create_bot import bot, db
 from aiogram import types, Dispatcher
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputFile
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from create_bot import ADMIN_ID
 from datetime import datetime
 from keyboards.kb_order import repl_for_order
@@ -10,7 +10,6 @@ from keyboards.kb_user import keyboard_user
 async def buy_step1(callback_query: types.CallbackQuery):
     inline_command = callback_query.data.split(':')
     all_product = db.bd_all_product_for_user_in_the_basket(int(inline_command[1]))
-    print(all_product)
     id_products = [id_prod[1] for id_prod in all_product]
     for i in all_product:
         prod = db.bd_returns_one_item(i[1])

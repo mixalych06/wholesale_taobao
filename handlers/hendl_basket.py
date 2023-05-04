@@ -76,7 +76,6 @@ async def basket_next_user(callback: types.CallbackQuery):
 async def dell_product_from_the_basket(callback: types.CallbackQuery):
     inline_command = callback.data.split(':')
     count = db.bd_checks_product_in_the_basket(callback.from_user.id, inline_command[1])
-    print(count)
     if count and count[0][0] > 1:
         db.bd_del_from_the_basket(1, callback.from_user.id, inline_command[1])
         number = int(inline_command[2])

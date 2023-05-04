@@ -1,13 +1,5 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputFile
-#
-# keyboard_user: ReplyKeyboardMarkup = ReplyKeyboardMarkup(resize_keyboard=True)
-#
-# but_user_products_in_stock: KeyboardButton = KeyboardButton('Товары в наличии')
-# but_user_basket: KeyboardButton = KeyboardButton('🛒Корзина')
-# but_user_orders: KeyboardButton = KeyboardButton('Мои Заказы')
-# but_help: KeyboardButton = KeyboardButton('🆘Помощь')
-# keyboard_user.add(but_user_products_in_stock, but_user_basket).add(but_user_orders, but_help)
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 
 """
       Кнопки для корзины если в корзине более наменования принимает:
@@ -21,11 +13,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMedia
 async def repl_for_categor_for_admin(prod, id_prod, category, country, number=0):
     """Создает кнопки пагинации для товаров в наличии в зависимости от порядкового номера текущего товара"""
     repl = InlineKeyboardMarkup(row_width=4)
-    print(category)
-
-    print(country)
-    print(number)
-
     if 0 < number < prod - 1:
         repl.add(
             InlineKeyboardButton("➕", callback_data=f'plus:{id_prod}:{prod}:{number}:{-1}'),
