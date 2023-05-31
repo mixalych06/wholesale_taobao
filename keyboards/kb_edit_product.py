@@ -17,6 +17,7 @@ async def repl_for_categor_for_admin(prod, id_prod, category, country, number=0)
         repl.add(
             InlineKeyboardButton("➕", callback_data=f'plus:{id_prod}:{prod}:{number}:{-1}'),
             InlineKeyboardButton("➖", callback_data=f'plus:{id_prod}:{prod}:{number}:{1}')).add(
+            InlineKeyboardButton("Редактировать товар", callback_data=f'edit_product:{id_prod}')).add(
             InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{country}:{category}:{number - 1}'),
             InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
             InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{country}:{category}:{number + 1}')).add(
@@ -26,6 +27,7 @@ async def repl_for_categor_for_admin(prod, id_prod, category, country, number=0)
         repl.add(
             InlineKeyboardButton("➕", callback_data=f'plus:{id_prod}:{prod}:{number}:{-1}'),
             InlineKeyboardButton("➖", callback_data=f'plus:{id_prod}:{prod}:{number}:{1}')).add(
+            InlineKeyboardButton("Редактировать товар", callback_data=f'edit_product:{id_prod}')).add(
             InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{country}:{category}:{prod - 1}'),
             InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
             InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{country}:{category}:{number + 1}')).add(
@@ -35,6 +37,7 @@ async def repl_for_categor_for_admin(prod, id_prod, category, country, number=0)
         repl.add(
             InlineKeyboardButton("➕", callback_data=f'plus:{id_prod}:{prod}:{number}:{-1}'),
             InlineKeyboardButton("➖", callback_data=f'plus:{id_prod}:{prod}:{number}:{1}')).add(
+            InlineKeyboardButton("Редактировать товар", callback_data=f'edit_product:{id_prod}')).add(
             InlineKeyboardButton('⬅️⬅️⬅️', callback_data=f'next_a:{country}:{category}:{number - 1}'),
             InlineKeyboardButton(f'{number + 1}/{prod}', callback_data='null'),
             InlineKeyboardButton('➡️➡️➡️', callback_data=f'next_a:{country}:{category}:{0}')).add(
