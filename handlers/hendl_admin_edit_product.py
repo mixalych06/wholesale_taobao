@@ -1,4 +1,4 @@
-from create_bot import bot, db
+from create_bot import bot, db, ADMIN_ID
 from aiogram import types, Dispatcher
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from keyboards.kb_other import gen_markup_category
@@ -313,7 +313,8 @@ async def end_edit_product_price(message: types.Message, state: FSMContext):
 
 
 def register_handler_edit_product(dp: Dispatcher):
-    dp.register_message_handler(coutry_for_admin, text='Редактировать товары')
+    dp.register_message_handler(coutry_for_admin, lambda message: str(message.from_user.id) in ADMIN_ID,
+                                text='Редактировать товары')
 
     dp.register_callback_query_handler(categories_in_stock_for_admin, lambda x: x.data.startswith('catforad'))
     dp.register_callback_query_handler(product_in_stock_for_admin, lambda x: x.data.startswith('prodforad'))
