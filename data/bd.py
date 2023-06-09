@@ -224,6 +224,34 @@ class DataBase:
                 (index, id_product))
             self.connection.commit()
 
+    def bd_edit_product_name(self, name, id_product):
+        """Изменение Названия товара"""
+        with self.connection:
+            self.cursor.execute(
+                "UPDATE stock SET product_name = ? "
+                "WHERE ID = ?",
+                (name, id_product))
+            self.connection.commit()
+
+    def bd_edit_product_specification(self, specification, id_product):
+        """Изменение описания товара"""
+        with self.connection:
+            self.cursor.execute(
+                "UPDATE stock SET specifications = ? "
+                "WHERE ID = ?",
+                (specification, id_product))
+            self.connection.commit()
+
+
+    def bd_edit_product_price(self, price, id_product):
+        """Изменение цены товара"""
+        with self.connection:
+            self.cursor.execute(
+                "UPDATE stock SET price = ? "
+                "WHERE ID = ?",
+                (price, id_product))
+            self.connection.commit()
+
     def bd_del_from_the_basket(self, index, user_id, id_product):
         """Удаление одного товара из корзины"""
         if index == 0:

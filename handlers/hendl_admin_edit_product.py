@@ -9,7 +9,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 async def coutry_for_admin(message: types.Message):
-    """Кнопка товары в наличии"""
+    """Кнопка страна для  редактирования товаров"""
     countries = set(db.bd_checks_for_country_in_stock_for_admin())
     country_dict = {country: 'catforad' for country in countries}
     await bot.delete_message(message.chat.id, message.message_id)
@@ -21,12 +21,26 @@ async def coutry_for_admin(message: types.Message):
                                parse_mode='HTML')
 
 
+async def coutry_inlin_for_admin(callback_query: types.CallbackQuery):
+    """Кнопка товары в наличии"""
+    countries = set(db.bd_checks_for_country_in_stock_for_admin())
+    country_dict = {country: 'catforad' for country in countries}
+    await callback_query.message.delete()
+    if countries:
+        await bot.send_message(callback_query.from_user.id, text='Выберите страну',
+                               reply_markup=await gen_markup_category(country_dict))
+    else:
+        await bot.send_message(callback_query.from_user.id, text=f'Нет товаров',
+                               parse_mode='HTML')
+
+
 async def categories_in_stock_for_admin(callback_query: types.CallbackQuery):
-    """Кнопки категория для user"""
+    """Кнопки категория для редактирования товаров"""
     inline_command = callback_query.data.split(':')
     user_id = callback_query.from_user.id
     categories = db.bd_checks_for_category_in_stock_for_admin(inline_command[1])
     categories_dict = {category: f'prodforad:{str(inline_command[1])}' for category in categories}
+    categories_dict['Назад'] = f'reset_count'
     try:
         await callback_query.message.edit_text(f'<b>{inline_command[1]}</b>\nВыберите категорию',
                                                reply_markup=await gen_markup_category(categories_dict),
@@ -38,7 +52,7 @@ async def categories_in_stock_for_admin(callback_query: types.CallbackQuery):
 
 
 async def product_in_stock_for_admin(callback_query: types.CallbackQuery):
-    """Выдаёт товары из выбраной категории"""
+    """Выдаёт товары из выбраной категории для изменения"""
     inline_command = callback_query.data.split(':')
     number = 0
     product_for_user = db.bd_checks_for_category_product_in_stock_for_admin(inline_command[1], inline_command[2])
@@ -50,6 +64,10 @@ async def product_in_stock_for_admin(callback_query: types.CallbackQuery):
         await callback_query.bot.send_photo(chat_id=callback_query.message.chat.id, photo=product_for_user[number][3],
                                             caption=user_caption, parse_mode='HTML',
                                             reply_markup=InlineKeyboardMarkup(row_width=4).add(
+                                                InlineKeyboardButton("Название",
+                                                                     callback_data=f'edit_name:'
+                                                                                   f'{product_for_user[number][0]}'))
+                                            .add(
                                                 InlineKeyboardButton("➕",
                                                                      callback_data=f'plus:'
                                                                                    f'{product_for_user[number][0]}:'
@@ -59,10 +77,14 @@ async def product_in_stock_for_admin(callback_query: types.CallbackQuery):
                                                                      callback_data=f'plus:'
                                                                                    f'{product_for_user[number][0]}:'
                                                                                    f'{len(product_for_user)}:'
-                                                                                   f'{number}:{1}')
-                                            ).add(InlineKeyboardButton("Редактировать товар",
-                                                                       callback_data=f'edit_product:'
-                                                                                     f'{product_for_user[number][0]}'))
+                                                                                   f'{number}:{1}'))
+                                            .add(
+                                                InlineKeyboardButton("Описание",
+                                                                     callback_data=f'edit_specific:'
+                                                                                   f'{product_for_user[number][0]}'),
+                                                InlineKeyboardButton("Цена",
+                                                                     callback_data=f'edit_price:'
+                                                                                   f'{product_for_user[number][0]}'))
                                             .add(
                                                 InlineKeyboardButton("⬅️⬅️⬅️",
                                                                      callback_data=f'next_a:{inline_command[1]}:'
@@ -83,6 +105,10 @@ async def product_in_stock_for_admin(callback_query: types.CallbackQuery):
         await callback_query.bot.send_photo(chat_id=callback_query.message.chat.id, photo=product_for_user[number][3],
                                             caption=user_caption, parse_mode='HTML',
                                             reply_markup=InlineKeyboardMarkup(row_width=4).add(
+                                                InlineKeyboardButton("Название",
+                                                                     callback_data=f'edit_name:'
+                                                                                   f'{product_for_user[number][0]}'))
+                                            .add(
                                                 InlineKeyboardButton("➕",
                                                                      callback_data=f'plus:'
                                                                                    f'{product_for_user[number][0]}:'
@@ -93,9 +119,13 @@ async def product_in_stock_for_admin(callback_query: types.CallbackQuery):
                                                                                    f'{product_for_user[number][0]}:'
                                                                                    f'{len(product_for_user)}:'
                                                                                    f'{number}:{1}'))
-                                            .add(InlineKeyboardButton("Редактировать товар",
-                                                                      callback_data=f'edit_product:'
-                                                                                    f'{product_for_user[number][0]}'))
+                                            .add(
+                                                InlineKeyboardButton("Описание",
+                                                                     callback_data=f'edit_specific:'
+                                                                                   f'{product_for_user[number][0]}'),
+                                                InlineKeyboardButton("Цена",
+                                                                     callback_data=f'edit_price:'
+                                                                                   f'{product_for_user[number][0]}'))
                                             .add(
                                                 InlineKeyboardButton('⬅️⬅️⬅️',
                                                                      callback_data='null'),
@@ -148,6 +178,10 @@ async def next_product_for_admin(callback_query: types.CallbackQuery):
         await callback_query.bot.send_photo(chat_id=callback_query.message.chat.id, photo=product_for_user[number][3],
                                             caption=user_caption, parse_mode='HTML',
                                             reply_markup=InlineKeyboardMarkup(row_width=4).add(
+                                                InlineKeyboardButton("Название",
+                                                                     callback_data=f'edit_name:'
+                                                                                   f'{product_for_user[number][0]}'))
+                                            .add(
                                                 InlineKeyboardButton("➕",
                                                                      callback_data=f'plus:'
                                                                                    f'{product_for_user[number][0]}:'
@@ -158,9 +192,13 @@ async def next_product_for_admin(callback_query: types.CallbackQuery):
                                                                                    f'{product_for_user[number][0]}:'
                                                                                    f'{len(product_for_user)}:'
                                                                                    f'{number}:{1}'))
-                                            .add(InlineKeyboardButton("Редактировать товар",
-                                                                      callback_data=f'edit_product:'
-                                                                                    f'{product_for_user[number][0]}'))
+                                            .add(
+                                                InlineKeyboardButton("Описание",
+                                                                     callback_data=f'edit_specific:'
+                                                                                   f'{product_for_user[number][0]}'),
+                                                InlineKeyboardButton("Цена",
+                                                                     callback_data=f'edit_price:'
+                                                                                   f'{product_for_user[number][0]}'))
                                             .add(
                                                 InlineKeyboardButton('⬅️⬅️⬅️',
                                                                      callback_data='null'),
@@ -211,84 +249,67 @@ class FSMEditProduct(StatesGroup):
     photo = State()
     product_name = State()
     specifications = State()
-    prise = State()
-    count = State()
+    price = State()
 
 
 async def next_fsm(callback_query: types.CallbackQuery):
     await FSMEditProduct.next()
 
 
-async def edit_product_start(callback_query: types.CallbackQuery):
-    """Обработка  кнопки Редактировать товар"""
+async def edit_product_name(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработка  кнопки название при редактировании товара"""
     inline_command = callback_query.data.split(':')
-    product = db.bd_returns_one_item(int(inline_command[1]))[3:8]
-    print(product)
-    await bot.send_photo(callback_query.from_user.id, photo=product[0],
-                         reply_markup=InlineKeyboardMarkup()
-                         .add(InlineKeyboardButton('Изменить', callback_data=f'start_edit:{inline_command[1]}'),
-                              InlineKeyboardButton('Подтвердить', callback_data='cancel'))
-                         .add(InlineKeyboardButton('Отмена', callback_data='cancel')))
+    product = db.bd_returns_one_item(int(inline_command[1]))[0]
+    await callback_query.message.reply('Введите новое название',
+                                       reply_markup=InlineKeyboardMarkup().add(
+                                           InlineKeyboardButton("Отмена", callback_data=f"cancel")))
+    await FSMEditProduct.product_name.set()
+    async with state.proxy() as data:
+        data[1] = product
 
 
-async def edit_product(callback_query: types.CallbackQuery, state: FSMContext):
-    await FSMEditProduct.photo.set()
+async def end_edit_product_name(message: types.Message, state: FSMContext):
+    """Завершение изменения названия товара. Запись в БД """
+    async with state.proxy() as data:
+        db.bd_edit_product_name(message.text, data[1])
+    await state.finish()
+
+
+async def edit_product_specifications(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработка  кнопки описание товара при редактировании товара"""
     inline_command = callback_query.data.split(':')
-    product = db.bd_returns_one_item(int(inline_command[1]))[:8]
+    product = db.bd_returns_one_item(int(inline_command[1]))[0]
+    await callback_query.message.reply('Введите новое описание товара',
+                                       reply_markup=InlineKeyboardMarkup().add(
+                                           InlineKeyboardButton("Отмена", callback_data=f"cancel")))
+    await FSMEditProduct.specifications.set()
     async with state.proxy() as data:
-        data[1] = {product.index(key): key for key in product}
-        print(data)
-    await callback_query.message.reply('Отправьте одно новое фото', reply_markup=InlineKeyboardMarkup().add(
-        InlineKeyboardButton("Отмена", callback_data=f"cancel")))
+        data[1] = product
 
 
-async def edit_product_photo(message: types.Message, state: FSMContext):
+async def end_edit_product_specifications(message: types.Message, state: FSMContext):
+    """Завершение описания товара. Запись в БД """
     async with state.proxy() as data:
-        data[1][3] = message.photo[0].file_id
-        print(data)
+        db.bd_edit_product_specification(message.text, data[1])
+    await state.finish()
 
-        await message.reply(f'Изменить название?\n{data[1][4]}\n Для изменения отправьте сообщение с новым названием',
-                            reply_markup=InlineKeyboardMarkup()
-                            .add(InlineKeyboardButton('Не изменять', callback_data='skip'))
-                            .add(InlineKeyboardButton('Отмена', callback_data='cancel')))
-        await FSMEditProduct.next()
-
-
-async def edit_product_name(message: types.Message, state: FSMContext):
+async def edit_product_price(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработка  кнопки цена товара при редактировании товара"""
+    inline_command = callback_query.data.split(':')
+    product = db.bd_returns_one_item(int(inline_command[1]))[0]
+    await callback_query.message.reply('Укажите новую цену товара в рублях. Только цифры',
+                                       reply_markup=InlineKeyboardMarkup().add(
+                                           InlineKeyboardButton("Отмена", callback_data=f"cancel")))
+    await FSMEditProduct.price.set()
     async with state.proxy() as data:
-        data[1][4] = message.text
-        print(data)
-
-        await message.reply(f'Изменить описание?\n{data[1][4]}\n Для изменения отправьте сообщение с новым описанием',
-                            reply_markup=InlineKeyboardMarkup()
-                            .add(InlineKeyboardButton('Не изменять', callback_data='skip'))
-                            .add(InlineKeyboardButton('Отмена', callback_data='cancel')))
-        await FSMEditProduct.next()
+        data[1] = product
 
 
-#
-# async def add_product_specifications(message: types.Message, state: FSMContext):
-#     async with state.proxy() as data:
-#         data['specifications'] = message.text
-#         await FSMRAddProduct.next()
-#         await message.reply('Отправьте цену', reply_markup=InlineKeyboardMarkup().add(
-#             InlineKeyboardButton("Отмена", callback_data=f"cancel")))
-#
-#
-# async def add_product_prise(message: types.Message, state: FSMContext):
-#     async with state.proxy() as data:
-#         data['prise'] = message.text
-#         await FSMRAddProduct.next()
-#         await message.reply('Отправьте количество в наличии', reply_markup=InlineKeyboardMarkup().add(
-#             InlineKeyboardButton("Отмена", callback_data=f"cancel")))
-#
-#
-# async def add_product_count(message: types.Message, state: FSMContext):
-#     async with state.proxy() as data:
-#         data['count'] = message.text
-#         db.bd_add_product_in_stock(list(data.values()))
-#         await message.answer(text='опубликовано')
-#         await state.finish()
+async def end_edit_product_price(message: types.Message, state: FSMContext):
+    """Завершение изменения цены товара. Запись в БД """
+    async with state.proxy() as data:
+        db.bd_edit_product_price(message.text, data[1])
+    await state.finish()
 
 
 def register_handler_edit_product(dp: Dispatcher):
@@ -299,8 +320,13 @@ def register_handler_edit_product(dp: Dispatcher):
     dp.register_callback_query_handler(next_product_for_admin, lambda x: x.data.startswith('next_a'))
     dp.register_callback_query_handler(del_prod, lambda x: x.data.startswith('delprod'))
     dp.register_callback_query_handler(plus_prod, lambda x: x.data.startswith('plus'))
-    dp.register_callback_query_handler(edit_product_start, lambda x: x.data.startswith('edit_product'))
-
-    dp.register_callback_query_handler(edit_product, lambda x: x.data.startswith('start_edit'), state=None)
-    dp.register_message_handler(edit_product_photo, content_types=['photo'], state=FSMEditProduct.photo)
-    dp.register_message_handler(edit_product_name, state=FSMEditProduct.product_name)
+    dp.register_callback_query_handler(coutry_inlin_for_admin, lambda x: x.data.startswith('reset_count'))
+    dp.register_callback_query_handler(edit_product_name, lambda x: x.data.startswith('edit_name'),
+                                       state=None)
+    dp.register_message_handler(end_edit_product_name, state=FSMEditProduct.product_name)
+    dp.register_callback_query_handler(edit_product_specifications, lambda x: x.data.startswith('edit_specific'),
+                                       state=None)
+    dp.register_message_handler(end_edit_product_specifications, state=FSMEditProduct.specifications)
+    dp.register_callback_query_handler(edit_product_price, lambda x: x.data.startswith('edit_price'),
+                                       state=None)
+    dp.register_message_handler(end_edit_product_price, state=FSMEditProduct.price)
