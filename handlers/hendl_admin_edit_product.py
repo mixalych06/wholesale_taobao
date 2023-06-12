@@ -159,16 +159,10 @@ async def next_product_for_admin(callback_query: types.CallbackQuery):
         photo = InputMediaPhoto(media=product_for_user[number][3], caption=user_caption, parse_mode='HTML')
         await callback_query.bot.edit_message_media(media=photo, chat_id=callback_query.message.chat.id,
                                                     message_id=callback_query.message.message_id,
-                                                    reply_markup=await repl_for_categor_for_admin(len(product_for_user),
-                                                                                                  product_for_user[
-                                                                                                      number][
-                                                                                                      0],
-                                                                                                  inline_command[2],
-                                                                                                  country=
-                                                                                                  product_for_user[
-                                                                                                      number][
-                                                                                                      1],
-                                                                                                  number=number))
+                                                    reply_markup=await repl_for_categor_for_admin(
+                                                        len(product_for_user), product_for_user[number][0],
+                                                        inline_command[2], country=product_for_user[number][1],
+                                                        number=number))
     elif len(product_for_user) == 1:
         number = 0
         await callback_query.message.delete()
@@ -252,14 +246,10 @@ class FSMEditProduct(StatesGroup):
     price = State()
 
 
-async def next_fsm(callback_query: types.CallbackQuery):
-    await FSMEditProduct.next()
-
-
 async def edit_product_name(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка  кнопки название при редактировании товара"""
     inline_command = callback_query.data.split(':')
-    product = db.bd_returns_one_item(int(inline_command[1]))[0]
+    product = int(inline_command[1])
     await callback_query.message.reply('Введите новое название',
                                        reply_markup=InlineKeyboardMarkup().add(
                                            InlineKeyboardButton("Отмена", callback_data=f"cancel")))
@@ -278,7 +268,7 @@ async def end_edit_product_name(message: types.Message, state: FSMContext):
 async def edit_product_specifications(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка  кнопки описание товара при редактировании товара"""
     inline_command = callback_query.data.split(':')
-    product = db.bd_returns_one_item(int(inline_command[1]))[0]
+    product = int(inline_command[1])
     await callback_query.message.reply('Введите новое описание товара',
                                        reply_markup=InlineKeyboardMarkup().add(
                                            InlineKeyboardButton("Отмена", callback_data=f"cancel")))
@@ -293,10 +283,11 @@ async def end_edit_product_specifications(message: types.Message, state: FSMCont
         db.bd_edit_product_specification(message.text, data[1])
     await state.finish()
 
+
 async def edit_product_price(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка  кнопки цена товара при редактировании товара"""
     inline_command = callback_query.data.split(':')
-    product = db.bd_returns_one_item(int(inline_command[1]))[0]
+    product = int(inline_command[1])
     await callback_query.message.reply('Укажите новую цену товара в рублях. Только цифры',
                                        reply_markup=InlineKeyboardMarkup().add(
                                            InlineKeyboardButton("Отмена", callback_data=f"cancel")))

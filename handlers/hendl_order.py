@@ -5,23 +5,65 @@ from create_bot import ADMIN_ID
 from datetime import datetime
 from keyboards.kb_order import repl_for_order
 from keyboards.kb_user import keyboard_user
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
+
+
+async def no_reg(callback_query: types.CallbackQuery):
+    '''Удаление собщения при отказе регистации'''
+    await callback_query.message.delete()
+
+
+class FSMRegistrationPhone(StatesGroup):
+    phone_user = State()
+
+
+async def registration_phone(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработка  кнопки регистрация"""
+    await callback_query.message.edit_text(text='В сообщении укажите ваш номер телефона',
+                                           reply_markup=InlineKeyboardMarkup().add(
+                                               InlineKeyboardButton("Отмена", callback_data=f"cancel")))
+    await FSMRegistrationPhone.phone_user.set()
+    async with state.proxy() as data:
+        data['id_user'] = callback_query.from_user.id
+
+
+
+async def registration_phone_end(message: types.Message, state: FSMContext):
+    """Завершение изменения названия товара. Запись в БД """
+    async with state.proxy() as data:
+        db.bd_reg_user_phone(data['id_user'], message.text, )
+        await message.answer(text='Вы успешно зарегестрировались', reply_markup=InlineKeyboardMarkup().add(
+            InlineKeyboardButton('Изменить номер',
+                                 callback_data='phone_reg'),
+            InlineKeyboardButton('Ok', callback_data='no_reg')))
+    await state.finish()
 
 
 async def buy_step1(callback_query: types.CallbackQuery):
     inline_command = callback_query.data.split(':')
-    all_product = db.bd_all_product_for_user_in_the_basket(int(inline_command[1]))
-    id_products = [id_prod[1] for id_prod in all_product]
-    for i in all_product:
-        prod = db.bd_returns_one_item(i[1])
-        if not prod or not int(prod[7]) or not int(prod[-1]):
-            db.bd_checking_availability(0, 0, callback_query.from_user.id, i[1])
-            continue
-        elif int(i[2]) <= int(prod[7]) and int(prod[-1]):  # если товаров в корзине меньше или равно чем в наличии
-            db.bd_checking_availability(int(i[2]), 1, callback_query.from_user.id, i[1])
-            continue
-        elif int(i[2]) > int(prod[7]) and int(prod[-1]):
-            db.bd_checking_availability(int(prod[7]), 1, callback_query.from_user.id, i[1])
-    await buy_step2(callback_query.from_user.id)
+    user_phon = db.bd_returned_user_phone(int(inline_command[1]))
+    await bot.answer_callback_query(callback_query.id)
+    if user_phon[0] == 1:
+        await callback_query.message.answer('Для совершения покупки пожалуйста, зарегистрируйтесь.',
+                                            reply_markup=InlineKeyboardMarkup().add(
+                                                InlineKeyboardButton('Регистрация',
+                                                                     callback_data=f'phone_reg:{inline_command[1]}'),
+                                                InlineKeyboardButton('Отмена', callback_data='no_reg')))
+    else:
+        all_product = db.bd_all_product_for_user_in_the_basket(int(inline_command[1]))
+        id_products = [id_prod[1] for id_prod in all_product]
+        for i in all_product:
+            prod = db.bd_returns_one_item(i[1])
+            if not prod or not int(prod[7]) or not int(prod[-1]):
+                db.bd_checking_availability(0, 0, callback_query.from_user.id, i[1])
+                continue
+            elif int(i[2]) <= int(prod[7]) and int(prod[-1]):  # если товаров в корзине меньше или равно чем в наличии
+                db.bd_checking_availability(int(i[2]), 1, callback_query.from_user.id, i[1])
+                continue
+            elif int(i[2]) > int(prod[7]) and int(prod[-1]):
+                db.bd_checking_availability(int(prod[7]), 1, callback_query.from_user.id, i[1])
+        await buy_step2(callback_query.from_user.id)
 
 
 async def buy_step2(user_id):
@@ -112,8 +154,9 @@ async def order_formation(user_id):
     a = ''
     for j in order_product:
         a += f'<b>{j[1]}</b> - {j[2]} шт. ({j[3]} руб/шт.)\n'
-    await bot.send_message(user_id, text=f'<b>Ваш Заказ №{order[0]}</b>\n******\n{a}******\n<b>Сумма: {order[5]} руб.</b>\nОтправлен на сборку,\n'
-                                         f'Пожалуйста дождитесь сообщения о готовности',
+    await bot.send_message(user_id,
+                           text=f'<b>Ваш Заказ №{order[0]}</b>\n******\n{a}******\n<b>Сумма: {order[5]} руб.</b>\nОтправлен на сборку,\n'
+                                f'Пожалуйста дождитесь сообщения о готовности',
                            parse_mode='HTML', reply_markup=keyboard_user)
     await bot.send_message(ADMIN_ID, text=f'<b>Новый заказ №{order[0]}</b>\n{a}<b>Сумма: {order[5]} руб.</b>',
                            parse_mode='HTML', reply_markup=InlineKeyboardMarkup().
@@ -128,3 +171,8 @@ def register_handler_order(dp: Dispatcher):
     dp.register_callback_query_handler(next_order, lambda x: x.data.startswith('next_order'))
     dp.register_callback_query_handler(order_yes, lambda x: x.data.startswith('yes_buy'))
     dp.register_callback_query_handler(order_no, lambda x: x.data.startswith('no_buy'))
+    dp.register_callback_query_handler(no_reg, text='no_reg')
+
+    dp.register_callback_query_handler(registration_phone, lambda x: x.data.startswith('phone_reg'),
+                                       state=None)
+    dp.register_message_handler(registration_phone_end, state=FSMRegistrationPhone.phone_user)

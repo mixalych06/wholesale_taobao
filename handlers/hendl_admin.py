@@ -7,7 +7,6 @@ from keyboards.kb_admin import keyboard_admin1
 from keyboards.kb_other import gen_markup_category
 
 
-
 async def start_admin(message: types.Message):
     await bot.send_message(chat_id=message.from_user.id, text='Привет, админ', reply_markup=keyboard_admin1)
 

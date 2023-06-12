@@ -109,7 +109,6 @@ class DataBase:
         except IndexError:
             return []
 
-
     def bd_checks_for_category_product_in_stock_for_admin(self, counter, category):
         """Отдаёт admin список продуктов по стране и категории если продукт не удалён флаг value = 1"""
         try:
@@ -119,6 +118,7 @@ class DataBase:
                                            (counter, category)).fetchall()
         except IndexError:
             return []
+
     def bd_returns_one_item(self, id_product):
         """Возращает полное описание одного товара по id товара"""
         with self.connection:
@@ -196,9 +196,21 @@ class DataBase:
         with self.connection:
             return self.cursor.execute("SELECT * FROM orders WHERE ready = 0 AND issued = 0").fetchall()
 
+
+    def bd_returned_user_phone(self, id_user):
+        '''Номер телефона пользователя по id'''
+        with self.connection:
+            return self.cursor.execute("SELECT user_phone FROM users WHERE user_id = ?", (id_user,)).fetchone()
+
+
+
     """*********************************************************************************"""
 
     """*********************Изменение значений в существующих записях ********************************************"""
+    def bd_reg_user_phone(self, id_user, phone): #Добавление номера телефона пользователя по id'''
+        with self.connection:
+            self.cursor.execute("UPDATE users SET user_phone = ? WHERE user_id = ?", (phone, id_user,))
+            self.connection.commit()
 
     def bd_changes_count_in_basket(self, user_id, id_product):
         """Изменение количества товара в корзине yf +1"""
@@ -241,7 +253,6 @@ class DataBase:
                 "WHERE ID = ?",
                 (specification, id_product))
             self.connection.commit()
-
 
     def bd_edit_product_price(self, price, id_product):
         """Изменение цены товара"""
@@ -307,6 +318,7 @@ class DataBase:
         with self.connection:
             self.cursor.execute("UPDATE stock SET value = 0 WHERE ID = ?", (id_prod,))
             self.connection.commit()
+
     """*********************************************************************************"""
 
     """*********************Добавление в базу*******************************************"""
