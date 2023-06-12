@@ -13,7 +13,7 @@ async def command_start(message: types.Message):
                              caption=f'<b>Привет, {message.from_user.first_name}!</b>\n'
                                      f'Для просмотра товара нажмите на кнопуку В наличии\n'
                                      f'<i>С предложениями и вопросами обращаться к\n'
-                                     f'<a href="https://t.me/mixalych06">администратору</a></i>',
+                                     f'<a href="https://t.me/lyudmila_zakazi">администратору</a></i>',
                              parse_mode='HTML', reply_markup=keyboard_user)
     else:
         db.bd_add_new_user(message.from_user.id, message.from_user.first_name, date.today())
